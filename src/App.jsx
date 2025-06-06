@@ -7,7 +7,7 @@ import { FavoritesPage } from './pages/FavoritesPage';
 import { AboutPage } from './pages/AboutPage';
 import { ReadingListsPage } from './pages/ReadingListsPage';
 import { ListDetailPage } from './pages/ListDetailPage';
-import { ContactPage } from './pages/ContactPage';
+import ContactPage from './pages/ContactPage';
 import { useBooks } from './hooks/useBooks';
 import { useDarkMode } from './hooks/useDarkMode';
 import { ReadingListsProvider } from './contexts/ReadingListsContext';

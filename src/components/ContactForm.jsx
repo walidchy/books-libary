@@ -1,6 +1,8 @@
 import { useState } from 'react';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const ContactForm = () => {
+  const { t } = useLanguage();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -26,14 +28,14 @@ const ContactForm = () => {
   return (
     <div className="max-w-2xl mx-auto p-6">
       <div className="mb-8 text-center">
-        <h2 className="text-3xl font-bold mb-2">Contact Us</h2>
-        <p className="text-[#6E6E6E] dark:text-[#B0B0B0]">Get in touch with Walid</p>
+        <h2 className="text-3xl font-bold mb-2">{t('about.contact.title')}</h2>
+        <p className="text-[#6E6E6E] dark:text-[#B0B0B0]">{t('about.contact.subtitle')}</p>
       </div>
       
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
           <label htmlFor="name" className="block text-sm font-medium mb-2">
-            Name
+            {t('about.contact.name')}
           </label>
           <input
             type="text"
@@ -43,13 +45,13 @@ const ContactForm = () => {
             onChange={handleChange}
             required
             className="input"
-            placeholder="Your name"
+            placeholder={t('about.contact.namePlaceholder')}
           />
         </div>
         
         <div>
           <label htmlFor="email" className="block text-sm font-medium mb-2">
-            Email
+            {t('about.contact.email')}
           </label>
           <input
             type="email"
@@ -59,13 +61,13 @@ const ContactForm = () => {
             onChange={handleChange}
             required
             className="input"
-            placeholder="your.email@example.com"
+            placeholder={t('about.contact.emailPlaceholder')}
           />
         </div>
         
         <div>
           <label htmlFor="message" className="block text-sm font-medium mb-2">
-            Message
+            {t('about.contact.message')}
           </label>
           <textarea
             id="message"
@@ -75,7 +77,7 @@ const ContactForm = () => {
             required
             rows="4"
             className="input"
-            placeholder="Your message"
+            placeholder={t('about.contact.messagePlaceholder')}
           />
         </div>
         
@@ -83,7 +85,7 @@ const ContactForm = () => {
           type="submit"
           className="btn-primary w-full"
         >
-          Send Message
+          {t('about.contact.sendMessage')}
         </button>
       </form>
     </div>

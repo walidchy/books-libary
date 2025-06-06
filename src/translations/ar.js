@@ -194,7 +194,18 @@ export const ar = {
     exploreCategories: "استكشف الفئات",
     getInTouch: "تواصل معنا",
     contactMessage: "هل لديك أسئلة أو اقتراحات أو ملاحظات؟ نحب أن نسمع منك!",
-    contactUs: "اتصل بنا"
+    contactUs: "اتصل بنا",
+    contact: {
+      title: "اتصل بنا",
+      subtitle: "تواصل مع وليد",
+      name: "الاسم",
+      namePlaceholder: "اسمك",
+      email: "البريد الإلكتروني",
+      emailPlaceholder: "your.email@example.com",
+      message: "الرسالة",
+      messagePlaceholder: "رسالتك",
+      sendMessage: "إرسال الرسالة"
+    }
   },
   
   // Reading Lists

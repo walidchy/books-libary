@@ -194,7 +194,18 @@ export const en = {
     exploreCategories: "Explore Categories",
     getInTouch: "Get in Touch",
     contactMessage: "Have questions, suggestions, or feedback? We'd love to hear from you!",
-    contactUs: "Contact Us"
+    contactUs: "Contact Us",
+    contact: {
+      title: "Contact Us",
+      subtitle: "Get in touch with Walid",
+      name: "Name",
+      namePlaceholder: "Your name",
+      email: "Email",
+      emailPlaceholder: "your.email@example.com",
+      message: "Message",
+      messagePlaceholder: "Your message",
+      sendMessage: "Send Message"
+    }
   },
   
   // Reading Lists

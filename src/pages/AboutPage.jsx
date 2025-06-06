@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { BookOpenIcon, HeartIcon, GlobeAltIcon, SparklesIcon, ShieldCheckIcon, RocketLaunchIcon, UsersIcon, ChartBarIcon } from '@heroicons/react/24/outline';
 import { useLanguage } from '../contexts/LanguageContext';
 
@@ -249,9 +250,9 @@ export const AboutPage = () => {
             <p className="text-lg text-gray-600 dark:text-gray-400 mb-8">
               {t('about.contactMessage')}
             </p>
-            <button className="btn-primary">
+            <Link to="/contact" className="btn-primary">
               {t('about.contactUs')}
-            </button>
+            </Link>
           </div>
         </div>
       </section>
