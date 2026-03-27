@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import { MagnifyingGlassIcon, UserIcon, XMarkIcon, FunnelIcon } from '@heroicons/react/24/outline';
 
 export const SearchBar = ({ searchTerm, onSearchChange, filterAuthor, onAuthorFilterChange }) => {
@@ -6,7 +7,12 @@ export const SearchBar = ({ searchTerm, onSearchChange, filterAuthor, onAuthorFi
   const [isAuthorFocused, setIsAuthorFocused] = useState(false);
 
   return (
-    <div className="w-full max-w-5xl mx-auto">
+    <motion.div 
+      initial={{ y: 50, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.6, type: 'spring', bounce: 0.4 }}
+      className="w-full max-w-5xl mx-auto"
+    >
       {/* Search container with glass morphism */}
       <div className="glass rounded-2xl p-6 shadow-xl">
         <div className="flex flex-col lg:flex-row gap-4">
@@ -124,6 +130,6 @@ export const SearchBar = ({ searchTerm, onSearchChange, filterAuthor, onAuthorFi
           </div>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 };

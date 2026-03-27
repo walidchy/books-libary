@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import { HeartIcon, StarIcon, CalendarIcon, UserIcon, BookOpenIcon, EyeIcon, DocumentTextIcon, EllipsisVerticalIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon, StarIcon as StarSolidIcon } from '@heroicons/react/24/solid';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -43,7 +44,14 @@ export const BookCard = ({ book, onFavorite, isFavorite, onRemoveFromList, showR
 
   return (
     <>
-      <div className="group card-interactive h-full flex flex-col relative overflow-hidden">
+      <motion.div 
+        whileHover={{ scale: 1.02, y: -5 }}
+        whileTap={{ scale: 0.98 }}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className="group card h-full flex flex-col relative overflow-hidden cursor-pointer shadow-lg hover:shadow-xl dark:shadow-none"
+      >
         {/* Gradient overlay on hover */}
         <div className="absolute inset-0 bg-gradient-to-t from-primary-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10"></div>
         
@@ -251,7 +259,7 @@ export const BookCard = ({ book, onFavorite, isFavorite, onRemoveFromList, showR
             </button>
           )}
         </div>
-      </div>
+      </motion.div>
 
       {/* Add to List Modal */}
       {showAddToList && (

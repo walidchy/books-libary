@@ -118,6 +118,7 @@ function App() {
                     loading={loading}
                     favorites={favorites}
                     toggleFavorite={toggleFavorite}
+                    setCurrentCategory={setCurrentCategory}
                   />
                 } 
               />

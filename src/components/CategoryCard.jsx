@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import { BookOpenIcon, AcademicCapIcon, HeartIcon, RocketLaunchIcon, GlobeAltIcon, BeakerIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
 
 const categoryIcons = {
@@ -25,11 +26,16 @@ export const CategoryCard = ({ category, onCategorySelect }) => {
   const gradientColor = categoryColors[category.key] || 'from-primary-500 to-accent-500';
   
   return (
-    <div 
+    <motion.div 
+      whileHover={{ scale: 1.05, rotate: [0, -2, 2, 0], transition: { duration: 0.3 } }}
+      whileTap={{ scale: 0.95 }}
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
       onClick={() => onCategorySelect(category.key)}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="group relative cursor-pointer card-interactive p-8 overflow-hidden"
+      className="group relative cursor-pointer card-interactive p-8 overflow-hidden rounded-2xl shadow-md hover:shadow-2xl"
     >
       {/* Background gradient on hover */}
       <div className={`absolute inset-0 bg-gradient-to-br ${gradientColor} opacity-0 group-hover:opacity-5 transition-opacity duration-300`}></div>
@@ -84,6 +90,6 @@ export const CategoryCard = ({ category, onCategorySelect }) => {
       
       {/* Hover indicator */}
       <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary-500 to-transparent transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
-    </div>
+    </motion.div>
   );
 };

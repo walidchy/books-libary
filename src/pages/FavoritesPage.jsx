@@ -10,8 +10,8 @@ export const FavoritesPage = ({ favorites, toggleFavorite }) => {
 
   // Filter favorites based on search term
   const filteredFavorites = favorites.filter(book =>
-    book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    book.authors.some(author => author.toLowerCase().includes(searchTerm.toLowerCase()))
+    (book.title || '').toLowerCase().includes((searchTerm || '').toLowerCase()) ||
+    (book.authors || []).some(author => (author || '').toLowerCase().includes((searchTerm || '').toLowerCase()))
   );
 
   // Sort favorites based on selected option

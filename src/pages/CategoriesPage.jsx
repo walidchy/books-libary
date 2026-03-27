@@ -4,6 +4,7 @@ import { BookCard } from '../components/BookCard';
 import { LoadingSkeleton } from '../components/LoadingSkeleton';
 import { ArrowLeftIcon, Squares2X2Icon, ViewColumnsIcon, ListBulletIcon } from '@heroicons/react/24/outline';
 import { useLanguage } from '../contexts/LanguageContext';
+import axios from 'axios';
 
 export const CategoriesPage = ({ books, loading, favorites, toggleFavorite }) => {
   const { t } = useLanguage();
@@ -55,17 +56,40 @@ export const CategoriesPage = ({ books, loading, favorites, toggleFavorite }) =>
     setSelectedCategory(categoryKey);
     setCategoryLoading(true);
     
-    // Simulate API call for category-specific books
-    setTimeout(() => {
-      // Filter books based on category (this is a simulation)
-      const filtered = books.filter(book => 
-        book.subjects.some(subject => 
-          subject.toLowerCase().includes(categoryKey.toLowerCase())
-        )
-      );
-      setCategoryBooks(filtered);
+    try {
+      const response = await axios.get('https://openlibrary.org/search.json', {
+        params: {
+          q: `subject:${categoryKey}`,
+          limit: 40
+        }
+      });
+      if (response.data.docs) {
+        const processed = response.data.docs.map(doc => ({
+          key: doc.key.replace('/works/', ''),
+          title: doc.title || 'Untitled',
+          authors: doc.author_name || ['Unknown Author'],
+          coverUrl: doc.cover_i ? `https://covers.openlibrary.org/b/id/${doc.cover_i}-M.jpg` : '/placeholder-book.png',
+          firstPublishYear: doc.first_publish_year || null,
+          subjects: doc.subject || [],
+          description: doc.first_sentence ? doc.first_sentence[0] : '',
+          pageCount: doc.number_of_pages_median || null,
+          averageRating: doc.ratings_average || null,
+          ratingsCount: doc.ratings_count || 0,
+          publisher: doc.publisher ? doc.publisher[0] : '',
+          isbn: doc.isbn ? doc.isbn[0] : '',
+          previewLink: `https://openlibrary.org${doc.key}`,
+          infoLink: `https://openlibrary.org${doc.key}`
+        }));
+        setCategoryBooks(processed);
+      } else {
+        setCategoryBooks([]);
+      }
+    } catch (error) {
+      console.error('Error fetching category books:', error);
+      setCategoryBooks([]);
+    } finally {
       setCategoryLoading(false);
-    }, 1000);
+    }
   };
 
   const handleBackToCategories = () => {

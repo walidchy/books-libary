@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { SearchBar } from '../components/SearchBar';
 import { BookCard } from '../components/BookCard';
 import { LoadingSkeleton } from '../components/LoadingSkeleton';
 import { HeroAnimations } from '../components/HeroAnimations';
+import { motion } from 'framer-motion';
 import { SparklesIcon, BookOpenIcon, HeartIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { useLanguage } from '../contexts/LanguageContext';
 
@@ -21,6 +22,20 @@ export const HomePage = ({
   totalItems
 }) => {
   const { t, language } = useLanguage();
+  const [sortBy, setSortBy] = useState('relevance');
+  
+  const sortedBooks = [...books].sort((a, b) => {
+    switch (sortBy) {
+      case 'title':
+        return a.title.localeCompare(b.title);
+      case 'author':
+        return (a.authors[0] || '').localeCompare(b.authors[0] || '');
+      case 'year':
+        return (b.firstPublishYear || 0) - (a.firstPublishYear || 0);
+      default:
+        return 0; // Relevance (default fetched order)
+    }
+  });
   
   const stats = [
     { icon: BookOpenIcon, value: totalItems ? `${totalItems.toLocaleString()}+` : '1,000,000+', label: t('home.booksAvailable') },
@@ -43,26 +58,47 @@ export const HomePage = ({
         <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent-300 rounded-full blur-3xl opacity-20 animate-float animation-delay-400"></div>
         
         <div className="container-custom relative z-10">
-          <div className="text-center space-y-6 max-w-4xl mx-auto">
+          <motion.div 
+            initial="hidden"
+            animate="visible"
+            variants={{
+              hidden: { opacity: 0 },
+              visible: { opacity: 1, transition: { staggerChildren: 0.15 } }
+            }}
+            className="text-center space-y-6 max-w-4xl mx-auto"
+          >
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-sm font-medium animate-fade-in">
+            <motion.div 
+              variants={{ hidden: { opacity: 0, y: -20 }, visible: { opacity: 1, y: 0 } }}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-sm font-medium"
+            >
               <SparklesIcon className="h-4 w-4" />
               <span>{t('home.badge')}</span>
-            </div>
+            </motion.div>
             
             {/* Main heading */}
-            <h1 className="text-5xl md:text-7xl font-bold text-gray-900 dark:text-white animate-fade-up">
+            <motion.h1 
+              variants={{ hidden: { opacity: 0, scale: 0.95 }, visible: { opacity: 1, scale: 1 } }}
+              transition={{ type: 'spring', bounce: 0.4 }}
+              className="text-5xl md:text-7xl font-bold text-gray-900 dark:text-white"
+            >
               {t('home.title')}
               <span className="block gradient-text mt-2">{t('home.titleHighlight')}</span>
-            </h1>
+            </motion.h1>
             
             {/* Subheading */}
-            <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto animate-fade-up animation-delay-200">
+            <motion.p 
+              variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
+              className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto"
+            >
               {t('home.subtitle')}
-            </p>
+            </motion.p>
             
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8 animate-fade-up animation-delay-400">
+            <motion.div 
+              variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
+              className="flex flex-col sm:flex-row gap-4 justify-center mt-8"
+            >
               <button 
                 onClick={() => document.getElementById('search-section').scrollIntoView({ behavior: 'smooth' })}
                 className="btn-primary"
@@ -72,8 +108,8 @@ export const HomePage = ({
               <button className="btn-secondary">
                 {t('home.learnMore')}
               </button>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
           
           {/* Stats */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-20 max-w-3xl mx-auto">
@@ -127,14 +163,21 @@ export const HomePage = ({
                       {t('home.showing')} {books.length} {books.length === 1 ? t('home.book') : t('home.books')}
                     </p>
                   </div>
-                  <div className="flex gap-2">
-                    <button className="btn-ghost text-sm">
-                      <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
-                      </svg>
-                      {t('home.sortBy')}
-                    </button>
-                    <button className="btn-ghost text-sm">
+                  <div className="flex gap-2 items-center">
+                    <select
+                      value={sortBy}
+                      onChange={(e) => setSortBy(e.target.value)}
+                      className="px-3 py-1.5 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 outline-none transition-all"
+                    >
+                      <option value="relevance">{t('home.sortBy') || 'Sort By'}</option>
+                      <option value="title">Title</option>
+                      <option value="author">Author</option>
+                      <option value="year">Year (Newest)</option>
+                    </select>
+                    <button 
+                      onClick={() => document.getElementById('search-section').scrollIntoView({ behavior: 'smooth' })}
+                      className="btn-ghost text-sm flex items-center"
+                    >
                       <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
                       </svg>
@@ -146,7 +189,7 @@ export const HomePage = ({
 
               {/* Books grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {books.map((book, index) => (
+                {sortedBooks.map((book, index) => (
                   <div
                     key={book.key}
                     className="animate-fade-up"
@@ -212,6 +255,7 @@ export const HomePage = ({
                 onClick={() => {
                   setSearchTerm('');
                   setFilterAuthor('');
+                  searchBooks('');
                 }}
                 className="btn-primary"
               >

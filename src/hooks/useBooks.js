@@ -12,57 +12,62 @@ export const useBooks = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
 
-  const fetchBooks = async (category = currentCategory, startIndex = 0, append = false) => {
+  const fetchBooks = async (category = currentCategory, startIndex = 0, append = false, query = searchTerm) => {
     try {
       if (!append) setLoading(true);
       
       // Google Books API with larger dataset
       const maxResults = 40; // Maximum allowed by Google Books API
-      const searchQuery = category === 'all' ? 'books' : `subject:${category}`;
+      let searchQuery = category === 'all' ? 'books' : `subject:${category}`;
+      if (query && query.trim() !== '') {
+        searchQuery = query;
+      }
       
-      const response = await axios.get('https://www.googleapis.com/books/v1/volumes', {
+      // Switch to OpenLibrary API due to Google API rate limits
+      const response = await axios.get('https://openlibrary.org/search.json', {
         params: {
           q: searchQuery,
-          startIndex: startIndex,
-          maxResults: maxResults,
-          orderBy: 'relevance',
-          printType: 'books',
-          langRestrict: 'en'
+          offset: startIndex,
+          limit: maxResults
         }
       });
 
-      if (response.data.items) {
-        const processedBooks = response.data.items.map(item => {
-          const volumeInfo = item.volumeInfo;
+      if (response.data.docs && response.data.docs.length > 0) {
+        const processedBooks = response.data.docs.map(doc => {
           return {
-            key: item.id,
-            title: volumeInfo.title || 'Untitled',
-            authors: volumeInfo.authors || ['Unknown Author'],
-            coverUrl: volumeInfo.imageLinks?.thumbnail?.replace('http:', 'https:') || 
-                     volumeInfo.imageLinks?.smallThumbnail?.replace('http:', 'https:') || 
-                     '/placeholder-book.png',
-            firstPublishYear: volumeInfo.publishedDate ? 
-              new Date(volumeInfo.publishedDate).getFullYear() : null,
-            subjects: volumeInfo.categories || [],
-            description: volumeInfo.description || '',
-            pageCount: volumeInfo.pageCount || null,
-            averageRating: volumeInfo.averageRating || null,
-            ratingsCount: volumeInfo.ratingsCount || 0,
-            publisher: volumeInfo.publisher || '',
-            isbn: volumeInfo.industryIdentifiers?.[0]?.identifier || '',
-            previewLink: volumeInfo.previewLink || '',
-            infoLink: volumeInfo.infoLink || ''
+            key: doc.key.replace('/works/', ''),
+            title: doc.title || 'Untitled',
+            authors: doc.author_name || ['Unknown Author'],
+            coverUrl: doc.cover_i ? `https://covers.openlibrary.org/b/id/${doc.cover_i}-M.jpg` : '/placeholder-book.png',
+            firstPublishYear: doc.first_publish_year || null,
+            subjects: doc.subject || [],
+            description: doc.first_sentence ? doc.first_sentence[0] : '',
+            pageCount: doc.number_of_pages_median || null,
+            averageRating: doc.ratings_average || null,
+            ratingsCount: doc.ratings_count || 0,
+            publisher: doc.publisher ? doc.publisher[0] : '',
+            isbn: doc.isbn ? doc.isbn[0] : '',
+            previewLink: `https://openlibrary.org${doc.key}`,
+            infoLink: `https://openlibrary.org${doc.key}`
           };
         });
 
         if (append) {
-          setBooks(prevBooks => [...prevBooks, ...processedBooks]);
+          setBooks(prevBooks => {
+            const combined = [...prevBooks, ...processedBooks];
+            const seen = new Set();
+            return combined.filter(book => {
+              if (seen.has(book.key)) return false;
+              seen.add(book.key);
+              return true;
+            });
+          });
         } else {
           setBooks(processedBooks);
         }
         
-        setTotalItems(response.data.totalItems || 0);
-        setHasMore(startIndex + maxResults < (response.data.totalItems || 0));
+        setTotalItems(response.data.numFound || 0);
+        setHasMore(startIndex + maxResults < (response.data.numFound || 0));
         setCurrentPage(Math.floor(startIndex / maxResults));
       } else {
         if (!append) setBooks([]);
@@ -86,69 +91,21 @@ export const useBooks = () => {
   const loadMoreBooks = () => {
     if (!loading && hasMore) {
       const nextStartIndex = (currentPage + 1) * 40;
-      fetchBooks(currentCategory, nextStartIndex, true);
+      fetchBooks(currentCategory, nextStartIndex, true, searchTerm);
     }
   };
 
   const searchBooks = async (query) => {
-    if (!query.trim()) {
-      fetchBooks(currentCategory);
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const response = await axios.get('https://www.googleapis.com/books/v1/volumes', {
-        params: {
-          q: query,
-          maxResults: 40,
-          orderBy: 'relevance',
-          printType: 'books'
-        }
-      });
-
-      if (response.data.items) {
-        const processedBooks = response.data.items.map(item => {
-          const volumeInfo = item.volumeInfo;
-          return {
-            key: item.id,
-            title: volumeInfo.title || 'Untitled',
-            authors: volumeInfo.authors || ['Unknown Author'],
-            coverUrl: volumeInfo.imageLinks?.thumbnail?.replace('http:', 'https:') || 
-                     volumeInfo.imageLinks?.smallThumbnail?.replace('http:', 'https:') || 
-                     '/placeholder-book.png',
-            firstPublishYear: volumeInfo.publishedDate ? 
-              new Date(volumeInfo.publishedDate).getFullYear() : null,
-            subjects: volumeInfo.categories || [],
-            description: volumeInfo.description || '',
-            pageCount: volumeInfo.pageCount || null,
-            averageRating: volumeInfo.averageRating || null,
-            ratingsCount: volumeInfo.ratingsCount || 0,
-            publisher: volumeInfo.publisher || '',
-            isbn: volumeInfo.industryIdentifiers?.[0]?.identifier || '',
-            previewLink: volumeInfo.previewLink || '',
-            infoLink: volumeInfo.infoLink || ''
-          };
-        });
-        setBooks(processedBooks);
-      } else {
-        setBooks([]);
-      }
-    } catch (err) {
-      setError('Failed to search books. Please try again.');
-      console.error('Error searching books:', err);
-    } finally {
-      setLoading(false);
-    }
+    fetchBooks(currentCategory, 0, false, query);
   };
 
   const filteredBooks = books.filter(book => {
-    const matchesTitle = book.title.toLowerCase().includes(searchTerm.toLowerCase());
+    // searchTerm is already handled by the API, so we only filter by author locally
     const matchesAuthor = filterAuthor === '' || 
-      book.authors.some(author => 
+      (book.authors && book.authors.some(author => 
         author.toLowerCase().includes(filterAuthor.toLowerCase())
-      );
-    return matchesTitle && matchesAuthor;
+      ));
+    return matchesAuthor;
   });
 
   return {
