@@ -293,9 +293,27 @@ export const HomePage = ({
               </motion.div>
             ) : (
               <form 
-                onSubmit={(e) => {
+                onSubmit={async (e) => {
                   e.preventDefault();
-                  if (email) setIsSubscribed(true);
+                  if (!email) return;
+                  
+                  try {
+                    await fetch("https://formsubmit.co/ajax/chyboubwalid@gmail.com", {
+                      method: "POST",
+                      headers: { 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                      },
+                      body: JSON.stringify({
+                        email: email,
+                        _subject: "New Library App Subscriber!"
+                      })
+                    });
+                  } catch (error) {
+                    console.error("FormSubmit error:", error);
+                  } finally {
+                    setIsSubscribed(true);
+                  }
                 }}
                 className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto"
               >
