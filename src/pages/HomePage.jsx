@@ -23,6 +23,8 @@ export const HomePage = ({
 }) => {
   const { t, language } = useLanguage();
   const [sortBy, setSortBy] = useState('relevance');
+  const [email, setEmail] = useState('');
+  const [isSubscribed, setIsSubscribed] = useState(false);
   
   const sortedBooks = [...books].sort((a, b) => {
     switch (sortBy) {
@@ -276,16 +278,40 @@ export const HomePage = ({
             <p className="text-gray-600 dark:text-gray-400 mb-8">
               {t('home.newsletterMessage')}
             </p>
-            <form className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-              <input
-                type="email"
-                placeholder={t('home.enterEmail')}
-                className="flex-1 input"
-              />
-              <button type="submit" className="btn-primary">
-                {t('home.subscribe')}
-              </button>
-            </form>
+            {isSubscribed ? (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.9, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                className="max-w-md mx-auto p-4 bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-2xl border border-green-200 dark:border-green-800/50 flex items-center justify-center gap-3 shadow-lg"
+              >
+                <div className="bg-green-100 dark:bg-green-800 rounded-full p-1.5 flex-shrink-0">
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <span className="font-semibold text-lg">Thanks for subscribing!</span>
+              </motion.div>
+            ) : (
+              <form 
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (email) setIsSubscribed(true);
+                }}
+                className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto"
+              >
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder={t('home.enterEmail')}
+                  required
+                  className="flex-1 px-5 py-3.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:border-primary-500 focus:ring-4 focus:ring-primary-500/20 outline-none transition-all"
+                />
+                <button type="submit" className="btn-primary sm:px-8">
+                  {t('home.subscribe')}
+                </button>
+              </form>
+            )}
           </div>
         </div>
       </section>
